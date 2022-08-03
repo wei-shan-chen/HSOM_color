@@ -81,14 +81,24 @@ int main(){
     Item triangle(world.tri);
 
     glEnable(GL_DEPTH_TEST);
-
+    bool stop = false;
     SOM_Create();
     while (!glfwWindowShouldClose(window))
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
+        ImGui::Begin("som");   
+        ImGui::Text("Hello, %d", iter);
+        if(ImGui::Button("STSRT"))
+        {
+            go = 1;
+        } 
+        if(ImGui::Button("STOP"))
+        {
+            stop = !stop;
+        }               
+        ImGui::End();
         processInput(window);
         
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -97,7 +107,7 @@ int main(){
         ourShader.use();
 
 		MatrixStack model;
-        if(!is_som_finished && go == 1) {
+        if(!is_som_finished && go == 1 && !stop) {
             SOM_IterateOnce();
         }
         double width = 1.0/static_cast<double>(map_width[level]);

@@ -5,18 +5,21 @@
 #include <iostream>
 #include "SOM.h"
 
+using namespace std;
+
 Color** lattice;
 Color* dataset;
+int* map_width; 
+int* map_height; 
+int* max_iter;
 
 int go = 0;
 bool is_som_finished = false;
-int* map_width; 
-int* map_height; 
-const int max_level = 3;
-int level = 0;
-int* max_iter;
-const int num_color_type = 5;
 int iter = 0;
+int level = 0;
+const int max_level = 3;
+const int num_color_type = 5;
+
 double learning_rate = 0.1;
 double radius = 100;
 
@@ -39,11 +42,13 @@ void SOM_Create() {
     map_width = create(max_level);
     map_height = create(max_level);
     max_iter = createIter(max_level);
-
+   
     // 2. Create lattice
+    level = 0;
     lattice = createMap(map_width[level], map_height[level]);
     // 3. Create input dataset
     dataset = createInputDataset(num_color_type);
+   
 }
 
 void SOM_IterateOnce() {
@@ -54,6 +59,7 @@ void SOM_IterateOnce() {
     double neighbor = compute(iter, radius);
     const Color& nowInput = getInput(dataset, num_color_type);
     double minDist = -1.0;
+    double maxdist = 0.0;
     glm::ivec2 bmu;
     //compute winner point
     for(int i = 0; i < map_width[level]; i++){
@@ -61,6 +67,10 @@ void SOM_IterateOnce() {
             double tmp = 0.0;
             tmp = pow(lattice[i][j].r - nowInput.r,2) + pow(lattice[i][j].g - nowInput.g,2) + pow(lattice[i][j].b - nowInput.b,2);
             
+            if(tmp > maxdist){
+                maxdist = tmp;
+            }
+
             if(minDist < 0.0){
                 minDist = tmp;
             }else{
@@ -88,14 +98,16 @@ void SOM_IterateOnce() {
     }
     iter++;
     if(iter > max_iter[level]){
-        std::cout << "next0" << std::endl;
+        // std::cout << iter << std::endl;
         // 1.new map (interpolation)
         lattice = createNewMap(level, map_width, map_height, lattice);
         // 2.mapwidth mapheight
         level++;
     }
-
-    
+    if(maxdist < 0.001){
+        std::cout<< maxdist << std::endl;
+    }
+    // is_som_finished = (maxdist < 0.00001);
     is_som_finished = (iter > max_iter[max_level]);
 }
 
@@ -160,6 +172,7 @@ Color** createNewMap(int level, int* width, int* height, Color** lattice){
                         new_lattice[i*uplevelNum + in][j*uplevelNum + jn].r = lattice[i][j].r;
                         new_lattice[i*uplevelNum + in][j*uplevelNum + jn].g = lattice[i][j].g;
                         new_lattice[i*uplevelNum + in][j*uplevelNum + jn].b = lattice[i][j].b;
+                        
                     }
                 }
             }else{

@@ -13,5 +13,6 @@ extern bool is_som_finished;
 extern int* map_width;
 extern int* map_height;
 extern int level;
+extern int iter;
 extern int go;
 #endif
