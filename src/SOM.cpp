@@ -22,6 +22,8 @@ const int num_color_type = 5;
 
 double learning_rate = 0.1;
 double radius = 100;
+double n_learning_rate = 0.1;
+double neighbor = 100;
 
 Color** createMap(int width, int height);
 Color** createNewMap(int level, int* width, int* height, Color** lattice);
@@ -55,8 +57,8 @@ void SOM_IterateOnce() {
     // 1. Get one input from the dataset
     // 2. Find BMU
     // 3. Update BMU and the neighbors
-    double n_learning_rate = compute(iter, learning_rate);
-    double neighbor = compute(iter, radius);
+    n_learning_rate = compute(iter, learning_rate);
+    neighbor = compute(iter, radius);
     const Color& nowInput = getInput(dataset, num_color_type);
     double minDist = -1.0;
     double maxdist = 0.0;

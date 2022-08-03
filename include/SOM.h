@@ -15,4 +15,6 @@ extern int* map_height;
 extern int level;
 extern int iter;
 extern int go;
+extern double n_learning_rate;
+extern double neighbor;
 #endif

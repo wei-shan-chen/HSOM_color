@@ -89,7 +89,9 @@ int main(){
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::Begin("som");   
-        ImGui::Text("Hello, %d", iter);
+        ImGui::Text("iter, %d", iter);
+        ImGui::Text("radius, %f", neighbor);
+        ImGui::Text("learning_rate, %f", n_learning_rate);
         if(ImGui::Button("STSRT"))
         {
             go = 1;
