@@ -43,7 +43,7 @@ int main(){
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SOM", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "HSOM", NULL, NULL);
     if(window == NULL){
         std::cout << "failed to crerate GLFW window" << std::endl;
         glfwTerminate();
@@ -88,10 +88,14 @@ int main(){
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("som");   
+        ImGui::Begin("hsom");   
         ImGui::Text("iter, %d", iter);
         ImGui::Text("radius, %f", neighbor);
         ImGui::Text("learning_rate, %f", n_learning_rate);
+        for(int i = 0; i < num_color_type; i++){
+
+            ImGui::TextColored(ImVec4(dataset[i].r, dataset[i].g, dataset[i].b, 255), "color");
+        }
         if(ImGui::Button("STSRT"))
         {
             go = 1;
@@ -109,9 +113,14 @@ int main(){
         ourShader.use();
 
 		MatrixStack model;
+
         if(!is_som_finished && go == 1 && !stop) {
+            // std::cout << "-"<<std::endl;
             SOM_IterateOnce();
+            // std::cout << "."<<std::endl;
+
         }
+        
         double width = 1.0/static_cast<double>(map_width[level]);
         double height = 1.0/static_cast<double>(map_height[level]);
         for(int i = 0; i < map_width[level]; i++){
@@ -123,8 +132,6 @@ int main(){
                 model.Save(glm::scale(model.Top(),glm::vec3(width, height, 1.0f)));
                 ourShader.setMat4("model", model.Top());
                 ourShader.setVec3("color", glm::vec3(lattice[i][j].r,lattice[i][j].g,lattice[i][j].b));
-                // glBindVertexArray(triangle.VAO);
-                // glDrawArrays(GL_TRIANGLES, 0, 3);
                 glBindVertexArray(square.VAO);
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
                 model.Pop();

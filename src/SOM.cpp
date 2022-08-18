@@ -18,7 +18,7 @@ bool is_som_finished = false;
 int iter = 0;
 int level = 0;
 const int max_level = 3;
-const int num_color_type = 5;
+const int num_color_type = 20;
 
 double learning_rate = 0.1;
 double radius = 100;
@@ -33,9 +33,10 @@ int* createIter(int max_level);
 void destroyMap(Color** lattice, int width);
 void destroyInputDataset(Color* dataset);
 bool isInNeighborhood(glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius);
-void updateNode(Color** lattice, glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius, double learning_rate);
+void updateNode(Color** lattice, Color nowInput, glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius, double learning_rate);
 const Color& getInput(Color* dataset, int size);
-double compute(int iter, double fun);
+double computerate(int iter, double fun);
+double computeradius(int iter, double fun);
 double computeSacle(double sigma, double dist);
 
 void SOM_Create() {
@@ -55,15 +56,15 @@ void SOM_Create() {
 
 void SOM_IterateOnce() {
     // 1. Get one input from the dataset
-    // 2. Find BMU
-    // 3. Update BMU and the neighbors
-    n_learning_rate = compute(iter, learning_rate);
-    neighbor = compute(iter, radius);
+    
+    n_learning_rate = computerate(iter, learning_rate);
+    neighbor = computeradius(iter, radius);
     const Color& nowInput = getInput(dataset, num_color_type);
     double minDist = -1.0;
     double maxdist = 0.0;
     glm::ivec2 bmu;
     //compute winner point
+    // 2. Find BMU
     for(int i = 0; i < map_width[level]; i++){
         for(int j = 0; j < map_height[level]; j++){
             double tmp = 0.0;
@@ -75,6 +76,8 @@ void SOM_IterateOnce() {
 
             if(minDist < 0.0){
                 minDist = tmp;
+                bmu.x = 0;
+                bmu.y = 0;
             }else{
                 if(minDist > tmp){
                     minDist = tmp;
@@ -85,7 +88,7 @@ void SOM_IterateOnce() {
         }
     }
     // renew winner point and neighnorhood
-
+    // 3. Update BMU and the neighbors
     for(int i = 0; i < map_width[level]; i++){
         for(int j = 0; j < map_height[level]; j++){
             glm::ivec2 node = glm::ivec2(i,j);
@@ -94,23 +97,24 @@ void SOM_IterateOnce() {
 
             if( isInNeighborhood(bmu, node, neighbor)){
                 double n_radius = computeSacle(neighbor,squaredDist);
-                updateNode(lattice, bmu, node, n_radius, n_learning_rate);
+                updateNode(lattice, nowInput, bmu, node, n_radius, n_learning_rate);
             }
         }
     }
     iter++;
     if(iter > max_iter[level]){
-        // std::cout << iter << std::endl;
         // 1.new map (interpolation)
         lattice = createNewMap(level, map_width, map_height, lattice);
         // 2.mapwidth mapheight
         level++;
     }
+    
     if(maxdist < 0.001){
         std::cout<< maxdist << std::endl;
     }
-    // is_som_finished = (maxdist < 0.00001);
-    is_som_finished = (iter > max_iter[max_level]);
+
+    is_som_finished = (iter > max_iter[max_level-1]);
+
 }
 
 void SOM_Destroy() {
@@ -129,8 +133,8 @@ int* create(int max_level){
 int* createIter(int max_level){
     int* iterclass = (int*)malloc(sizeof(int) * max_level);
     iterclass[0] = 200;
-    iterclass[1] = 1000;
-    iterclass[2] = 5000;
+    iterclass[1] = 10000;
+    iterclass[2] = 50000;
     return iterclass;
 }
 Color** createMap(int width, int height) {
@@ -223,21 +227,25 @@ bool isInNeighborhood(glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius) {
     return false;
 }
 
-void updateNode(Color** lattice, glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius, double learning_rate) {
+void updateNode(Color** lattice, Color nowInput, glm::ivec2 bmuIdx, glm::ivec2 nodeIdx, double radius, double learning_rate) {
     const Color& bmu = lattice[bmuIdx.x][bmuIdx.y];
     Color& node = lattice[nodeIdx.x][nodeIdx.y];
-    node.r = node.r + radius * learning_rate * (bmu.r - node.r);
-    node.g = node.g + radius * learning_rate * (bmu.g - node.g);
-    node.b = node.b + radius * learning_rate * (bmu.b - node.b);
+    node.r = node.r + radius * learning_rate * (nowInput.r - node.r);
+    node.g = node.g + radius * learning_rate * (nowInput.g - node.g);
+    node.b = node.b + radius * learning_rate * (nowInput.b - node.b);
 }
 
 const Color& getInput(Color* dataset, int size) {
     int num = rand() % size;
     return dataset[num];
 }
-double compute(int iter, double fun){
+double computeradius(int iter, double fun){
     double lamda = ((double)(max_iter[level]))/ log(fun);
     double sigma = fun*exp(-1* ((double)iter)/ lamda);
+    return sigma;
+}
+double computerate(int iter, double fun){
+    double sigma = fun*exp(-1* ((double)iter)/ ((double)(max_iter[level])));
     return sigma;
 }
 double computeSacle(double sigma, double dist){

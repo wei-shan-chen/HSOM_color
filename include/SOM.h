@@ -17,4 +17,5 @@ extern int iter;
 extern int go;
 extern double n_learning_rate;
 extern double neighbor;
+extern const int num_color_type;
 #endif
