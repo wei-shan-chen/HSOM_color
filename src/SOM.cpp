@@ -133,8 +133,8 @@ int* create(int max_level){
 int* createIter(int max_level){
     int* iterclass = (int*)malloc(sizeof(int) * max_level);
     iterclass[0] = 200;
-    iterclass[1] = 10000;
-    iterclass[2] = 50000;
+    iterclass[1] = 5000;
+    iterclass[2] = 10000;
     return iterclass;
 }
 Color** createMap(int width, int height) {
